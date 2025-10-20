@@ -1,0 +1,7 @@
+{
+  "courses": [
+    { "id": 1, "name": "Node.js Basics" },
+    { "id": 2, "name": "Express.js Advanced" },
+    { "id": 3, "name": "JavaScript Fundamentals" }
+  ]
+}
