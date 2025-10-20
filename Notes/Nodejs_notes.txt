@@ -1,0 +1,1107 @@
+Node JS Course:
+================
+
+What is Node JS:
+================
+
+
+
+
+What is JavaScript Runtime Environment:
+========================================
+
+
+
+What is JavaScript Engine and Type of Engines:
+===============================================
+
+
+
+_______________________________________________________________________________
+
+How to write node js:
+======================
+
+We will write node js in 2 ways: 
+    1. Using the Node.js REPL (Read-Eval-Print Loop)
+    2. Writing Code in a JavaScript File (app.js)
+            node app.js 
+
+
+hello-world-node 
+    index.js 
+
+index.js:
+----------
+console.log('Hello Node JS');
+
+const array = [1, 2, 3, 4];
+console.log('array:', array)
+
+setTimeout(()=> {
+    console.log('This message will display after 2 seconds')
+}, 2000)
+
+console.log('This is last line')
+
+_______________________________________________________________________________
+
+Module System in Node JS:
+==========================
+
+The purpose of the Node.js module system is to make our code is more 
+organized, reusable, and maintainable.
+
+If we write all the code in single file, it will be messy.
+
+We have 2 types of module systems: 
+    1. CommonJS ( default one )
+    2. ES Modules ( modern )
+
+
+1. CommonJS Module System:
+==========================
+Uses module.exports to export
+
+Uses require() to import
+
+first-module.js:
+----------------
+function add(a, b) {
+    return a + b;
+}
+
+function substract(a, b) {
+    return a - b;
+}
+
+function divide(a, b) {
+    if(b === 0) {
+        throw new Error('Divide by zero is not allowed')
+    }
+    return a/b;
+}
+
+module.exports = {
+    add, 
+    substract, 
+    divide
+}
+
+index.js:
+---------
+const firstModule = require("./first-module");
+
+console.log(firstModule.add(10, 20));
+
+try {
+    console.log('trying to divide by zero');
+    let result = firstModule.divide(0, 10)
+    console.log("result: ", result)
+} catch(error) {
+    console.log('Caught an error', error.message)
+}
+
+
+wrapper-explorer.js:
+--------------------
+console.log("Node module wrapper demo");
+
+console.log('__filename in wrapper explorer: ', __filename);
+console.log('__dirname in wrapper explorer: ', __dirname);
+
+module.exports.greet = (name) => {
+    console.log(`Hello ${name}`)
+}
+
+
+wrapper-demo.js:
+-----------------
+const wrapperExplorer = require('./wrapper-explorer')
+
+console.log('In wrapper demo.js file');
+
+console.log("__filename in wrapper demo: ", __filename);
+console.log("__dirname in wrapper demo: ", __dirname);
+
+wrapperExplorer.greet('Jay Mannem');
+
+
+output: 
+-------
+filename: wrapper-explorer.js
+dirname: 2.node-module-system
+
+filename: wrapper-wrapper.js
+dirname: 2.node-module-system
+
+Hello Jay Mannem
+
+
+
+2. ES Modules:
+===============
+Uses export to export
+
+Uses import to import
+
+Requires "type": "module" in package.json or .mjs file extension
+
+
+math.js:
+---------
+export function add(a, b) {
+  return a + b;
+}
+
+export function substract(a, b) {
+  return a - b;
+}
+
+
+index.js:
+----------
+import { add, substract } from './math.js';
+
+console.log("Add:", add(5, 3));        // 8
+console.log("Subtract:", substract(5, 3)); // 2
+
+_______________________________________________________________________________
+
+Difference between export and export default:
+===============================================
+There are two main ways to export code: 
+    1. export
+    2. export default
+
+
+1. export (Named Export):
+=========================
+We can export multiple values from a module.
+
+We must use the same name when importing.
+
+Use case: For utility functions and constants.
+
+math.js:
+--------
+export const add = (a, b) => a + b;
+export const substract = (a, b) => a - b;
+
+index.js:
+----------
+import { add, substract } from './math.js';
+
+console.log(add(5, 3));       // 8
+console.log(substract(5, 3));  // 2
+
+
+2. export default:
+==================
+We can export only one default value per module.
+
+We can import it with any name.
+
+Use case: For Main functions/class
+
+
+calculator.js:
+---------------
+const multiply = (a, b) => a * b;
+export default multiply;
+
+
+index.js:
+----------
+import multiply from './calculator.js';
+
+console.log(multiply(4, 5));  // 20
+_______________________________________________________________________________
+
+Node Package Manager:
+======================
+The Node Package Manager (npm) is a powerful tool.
+
+It helps developers to install the packages/libraries. 
+
+npm init is a command used to initialize a new Node.js project and 
+create a package.json file, which is essential for managing  
+project's metadata, scripts and dependencies.
+
+npm init --> it will ask series of questions like 
+    name 
+    description
+    keywords
+    author 
+    license 
+    entry point etc... 
+
+If we want to skip all questions and use default values then we need 
+to run below command: 
+    npm init -y 
+
+npm init -y --> It creates a package.json with default settings/values.
+
+npm install lodash
+
+package.json:
+--------------
+"scripts": {
+    "start": "node index.js"
+},
+
+terminal --> npm start
+
+
+index.js:
+----------
+const lodash = require("lodash");
+
+const names = ['jaya', 'mannem', 'jaswik', 'rachana'];
+const capitalize = lodash.map(names, lodash.capitalize);
+console.log(capitalize) 
+
+// [ 'Jaya', 'Mannem', 'Jaswik', 'Rachana' ]
+
+
+
+lodash:
+========
+Lodash is a popular JavaScript utility library that provides a wide 
+range of helpful functions for working with arrays, objects, strings, 
+numbers, and more. 
+
+It simplifies the programming and helps to write clean and more 
+efficient code.
+
+npm install lodash 
+_______________________________________________________________________________
+
+package.json:
+==============
+We will define project metadata, scripts and manage the dependencies. 
+
+1. Project Metadata: 
+====================
+Stores basic info like: 
+    name 
+    version 
+    description 
+    keywords
+    author etc... 
+
+2. dependencies:
+=================
+List all the packages that our project depends on. 
+
+3. Scripts:
+===========
+Defines custom commands to run tasks like starting the server, 
+testing, building, etc.
+
+{
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"No tests yet\""
+  }
+}
+
+
+Differences between dependencies and Devdependencies:
+======================================================
+
+dependencies:
+=============
+1. needed for production.
+
+2. Examples: express, dotenv, mongoose, axios etc...
+
+    npm install express mongoose axios cors dotenv
+
+
+Devdependencies:
+=================
+1. needed for development only.
+
+2. Examples: nodemon, jest, prettier, eslint etc...
+
+    npm install --save-dev nodemon eslint jest prettier
+
+
+"dependencies": {
+  "express": "^4.18.2"
+},
+"devDependencies": {
+  "nodemon": "^3.0.1"
+}
+
+
+npm install -D package_name
+
+-D stands for --save-dev
+
+If we try to install wrong package like npm install 3453twd
+npm has a registry so first it will check that the package is 
+existed or not in the registry. 
+
+If existed in the registry then it will install otherwise it 
+will give 404 error.
+
+_______________________________________________________________________________
+
+npm commands:
+=============
+
+npm install <package-name>
+
+npm uninstall <package-name> and Remove it from package.json
+
+npm uninstall -g <package> --> Uninstalls the package at globally.
+
+npm update <package-name> --> Update a specific package
+
+npm update --> Update all packages. 
+
+npm outdated --> It will check for Outdated Packages
+
+npm install --> Installs all packages listed in package.json
+
+npm list --> Lists installed packages. 
+
+npm list -g --> Lists globally installed packages
+
+npm version --> It shows current version of the npm. 
+
+npm help --> Displays help info for npm commands
+
+npm start --> Runs the start script defined in package.json
+
+npm test --> Runs the test script. 
+
+npm run <script> --> Runs any custom script defined in package.json
+
+
+_______________________________________________________________________________
+
+Path Module:
+=============
+The path module in Node.js is a built-in core module.
+
+It provides utilities for working with files and directory paths.
+
+It Makes file handling more reliable and readable.
+
+We don’t need to install it —-> just require it.
+
+    path.dirname() --> Get the directory name
+
+    path.basename() --> Get the file name from a path
+
+    path.extname() --> Get the file extension
+
+    path.join() --> Join paths 
+
+    path.resolve() --> Resolve absolute path
+
+    path.normalize() --> Normalize a path, Fixes inconsistent slashes 
+    or relative segments.
+
+
+index.js:
+---------
+const path = require('path');
+
+// get directory name 
+console.log('Directory name: ', path.dirname(__filename))
+// C:\Users\v-jayamannem\Desktop\TechStack\Node JS\4.path-module
+
+// get filename 
+console.log('File name: ', path.basename(__filename)) // index.js
+
+// get file extension
+console.log("File Extension: ", path.extname(__filename)); // .js
+
+// join paths
+const joinPath = path.join("/user", "documents", "node", "projects");
+console.log("Join Path: ", joinPath) //  \user\documents\node\projects
+
+// Resolve (Absolute) Path 
+const resolvePath = path.resolve("users", "documents", "node", "projects");
+console.log("Resolve Path: ", resolvePath)
+// C:\Users\v-jayamannem\Desktop\TechStack\Node JS\4.path-module\
+users\documents\node\projects
+
+// Normalize a path
+const normalizePath = path.normalize("/user/.documents/../node/projects");
+console.log("Normalize Path", normalizePath) // \user\node\projects
+
+_______________________________________________________________________________
+
+File System Module:
+====================
+The File System (fs) module in Node.js is a built-in core module.
+
+This module allows us to interact with the file system on computer.
+
+
+Common Uses of the fs Module:
+=============================
+    1. Read a File 
+    2. Write to a File 
+    3. Append to a File 
+    4. Delete a File
+    5. Create a Directory
+    6. Read Contents of a Directory
+
+
+1. Read File:
+==============
+    fs.readFile --> Asynchronous 
+    fs.readFileSync --> Synchronous 
+
+readAsync.js:
+-------------
+const fs = require("fs");
+
+fs.readFile('notes.txt', 'utf8', (err, data)=> {
+    if(err) throw err;
+    console.log('Async read: ', data)
+})
+
+readSync.js:
+------------
+const fs = require("fs");
+
+const data = fs.readFileSync('notes.txt', 'utf8');
+console.log('Sync read: ', data)
+
+
+What is 'utf8':
+================
+utf8 stands for Unicode Transformation Format 8-bit.
+
+It’s a standard character encoding that can represent any character 
+in the Unicode standard.
+
+By default, Node.js reads files as binary buffers. If we want to read 
+the file as human-readable text, we need to specify 'utf8'.
+
+To Handle Multilingual Text: UTF-8 supports characters from all 
+languages, emojis, and special symbols. This is essential for 
+international applications.
+
+If we don’t use 'utf8', we’d have to manually convert the buffer 
+to a string like below: 
+
+fs.readFile('example.txt', (err, data) => {
+  const text = data.toString('utf8');
+  console.log(text);
+});
+
+
+2. Write to a File:
+====================
+    fs.writeFile --> Asynchronous
+    fs.writeFileSync --> Synchronous
+
+writeAsync.js:
+---------------
+const fs = require("fs");
+
+fs.writeFile("writeAsync.txt", "Best node js course", (err)=> {
+    if(err) throw err;
+    console.log('Async write: File created successfully!')
+})
+
+
+writeSync.js:
+--------------
+const fs = require("fs");
+
+fs.writeFileSync("writeSync.txt", "Best node js course")
+console.log("Write Sync: Created file successfully!")
+
+
+3. Append to a File:
+=====================
+    fs.appendFile --> Asynchronous
+    fs.appendFileSync --> Synchronous 
+
+
+appendAsync.js
+---------------
+const fs = require("fs");
+
+fs.appendFile('notes1.txt', "\nWelcome to the Node JS Course", (err)=> {
+    if(err) throw err;
+    console.log('Append Async: Data appended successfully!')
+})
+
+
+appendSync.js:
+---------------
+const fs = require("fs");
+
+fs.appendFileSync('notes2.txt', "\nWelcome to the Node JS Course");
+console.log('Append Sync: Data appended successfully!')
+
+
+4. Delete File:
+================
+    fs.unlink --> Asynchronous
+    fs.unlinkSync --> Synchronous 
+
+deleteAsync.js:
+---------------
+const fs = require("fs");
+
+fs.unlink('file1.txt', (err)=> {
+    if(err) throw err;
+    console.log('Delete Async: File deleted!', )
+})
+
+
+deleteSync.js:
+---------------
+const fs = require("fs");
+
+fs.unlinkSync("file2.txt");
+console.log('Delete Sync: File deleted!');
+
+
+If file2.txt does not exist, Node.js will throw an error like below:
+Error: ENOENT: no such file or directory, unlink 'file2.txt'
+
+example.js:
+------------
+const fs = require("fs");
+
+try {
+    fs.unlinkSync('file2.txt');
+    console.log('Delete Sync: File deleted!')
+} catch(error) {
+    if(error.code === "ENOENT") {
+        console.log("File does not exist")
+    } else {
+        throw error;
+    }
+}
+
+
+
+5. Create a directory:
+========================
+
+mkdir --> For Asynchronous
+
+mkdirSync --> For Synchronous
+
+createAsync.js:
+----------------
+const fs = require("fs");
+
+fs.mkdir('myFolder', (err)=> {
+    if(err) {
+        if(err.code === "EEXIST") {
+            console.log('Folder is already exist')
+        } else {
+            throw err;
+        }
+    } else {
+        console.log('Folder created')
+    }
+})
+
+
+createSync.js:
+---------------
+const fs = require("fs");
+
+try {
+    fs.mkdirSync('myFolder');
+    console.log("Folder created!")
+} catch(error) {
+    if(error.code === "EEXIST") {
+        console.log("Folder is already exist")
+    } else {
+        throw error
+    }
+}
+
+
+
+6. Read Contents of a Directory:
+==================================
+
+readdir --> For Synchronous 
+readdirSync --> For Asynchronous
+
+
+readDirAsync.js:
+-----------------
+const fs = require("fs");
+
+fs.readdir('myFolder', (err, files) => {
+    if(err) throw err;
+    console.log("Files in folder", files) 
+    // [ 'file.txt', 'file1.js', 'file2.js' ]
+})
+
+
+readDirSync.js:
+----------------
+const fs = require("fs");
+
+const files = fs.readdirSync('myFolder');
+console.log('Files in folder', files)
+// [ 'file.txt', 'file1.js', 'file2.js' ]
+
+
+
+existsSync:
+============
+It is a synchronous method in Node.js used to check whether a file 
+or folder exists at a given path.
+
+It returns true if the path exists, false if it doesn't.
+
+const dataFolder = path.join(__dirname, "data");
+if(!fs.existsSync(dataFolder)){
+    fs.mkdirSync(dataFolder);
+    console.log('data folder created')
+};
+
+
+When to Use fs.existsSync():
+=============================
+Before performing file operations like readFileSync, unlinkSync, etc.
+
+To avoid errors when accessing non-existent paths.
+
+
+Example:
+========
+const path = require("path");
+const fs = require("fs")
+
+const dataFolder = path.join(__dirname, "data");
+// C:\Users\v-jayamannem\Desktop\TechStack\Node JS\5.file-system-module\data
+
+// folder creating - sync way
+if(!fs.existsSync(dataFolder)){
+    fs.mkdirSync(dataFolder);
+    console.log('data folder created')
+};
+
+// write data to file - sync way
+const filePath = path.join(dataFolder, 'example.txt');
+fs.writeFileSync(filePath, "Welcome to Node JS Tutorial");
+console.log("File created successfully!")
+
+// read content from file - sync way
+const readContentFromFile = fs.readFileSync(filePath, "utf8");
+console.log('Content: ', readContentFromFile);
+
+// append data to file - sync way
+fs.appendFileSync(filePath, '\n This is a best tutorial');
+console.log('Content appended successfully!')
+
+
+
+// creating file - async way 
+const asyncFilePath = path.join(dataFolder, 'async-example.txt');
+fs.writeFile(asyncFilePath, 'Async node js', (err)=> {
+    if(err) throw err;
+    console.log("Async file is created successfully!")
+
+    fs.readFile(asyncFilePath, 'utf8', (err, data)=> {
+        if(err) throw err; 
+        console.log('Async file content: ', data)
+
+        fs.appendFile(asyncFilePath, '\nThis is another line added', (err)=> {
+            if(err) throw err; 
+            console.log('data appended async');
+
+            fs.readFile(asyncFilePath, 'utf8', (err, updatedData)=> {
+                if(err) throw err; 
+                console.log('Updated content: ', updatedData)
+            })
+        })
+    })
+})
+
+
+
+_______________________________________________________________________________
+
+Http Module:
+=============
+The http module in Node.js is a built-in core module that allows us to 
+create web servers and handle HTTP requests and responses.
+
+We don’t need to install it — just require it
+
+Purpose of the http Module: 
+    1. Create a web server
+    2. Handle incoming HTTP requests (GET, POST, etc.)
+    3. Send response to clients (like browsers or API consumers)
+    4. Build RESTful APIs
+
+http.createServer() --> Creates the server
+req --> Incoming request object (URL, method, headers)
+res --> Response object to send data back to the client
+res.writeHead() --> Sets status code and headers
+res.end() --> Ends the response and sends data
+server.listen() --> Starts the server on a specified port
+
+
+server.js:
+-----------
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+    console.log("Request received:");
+    console.log("Method:", req.method); // GET
+    console.log("URL:", req.url); // /
+});
+
+const port = 3000;
+server.listen(port, () => {
+    console.log(`Server is listening on port ${port}`);
+});
+
+
+server.js:
+----------
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+    console.log("Request received:");
+    res.writeHead(200, { "Content-Type": "text/plain"});
+    res.end("Welcome to node js")
+});
+
+const port = 3000;
+server.listen(port, () => {
+    console.log(`Server is listening on port ${port}`);
+});
+
+
+routes.js:
+-----------
+const http = require("http");
+
+const server = http.createServer((req, res)=> {
+    const url = req.url;
+    if(url === "/") {
+        res.writeHead(200, {'Content-Type': 'text/plain'});
+        res.end("Home Page")
+    } else if(url === "/projects") {
+        res.writeHead(200, {'Content-Type': 'text/plain'});
+        res.end("Projects Page")
+    } else {
+        res.writeHead(404, {'Content-Type': 'text/plain'});
+        res.end("This page can not be found")
+    }
+});
+
+const PORT = 3000;
+server.listen(PORT, ()=> {
+    console.log(`Server is listening to port ${PORT}`)
+})
+
+_______________________________________________________________________________
+
+Async programming:
+====================
+
+1. Callbacks and Callback hell:
+================================
+a callback is simply a function passed as an argument to another function, 
+which is then executed later, usually after main operation completes.
+
+
+Simple Example:
+================
+function person(name, callbackFn) {
+    console.log(`Hello ${name}`);
+    callbackFn()
+}
+
+function address() {
+    console.log("India")
+}
+
+person('Jay Mannem', address);
+
+
+callback hell:
+==============
+Callback Hell refers to a situation in JavaScript (and Node.js) 
+where we have multiple nested callbacks, making the code look 
+like a pyramid and very hard to read, maintain, and debug.
+
+Error handling becomes messy with nested callbacks.
+
+To avoid this, we use Promises or async/await.
+
+
+index.js:
+----------
+fs.readFile('input.txt', "utf8", (err, data)=> {
+    if(err) throw err;
+    console.log(data)
+})
+
+
+callback-hell.js:
+------------------
+const fs = require("fs");
+
+fs.readFile("input.txt", "utf8", (err, data) => {
+  if (err) {
+    console.log("Error reading file: ", err);
+    return;
+  }
+
+  const modifiedData = data.toUpperCase();
+
+  fs.writeFile("output.txt", modifiedData, (err) => {
+    if (err) {
+      console.log("Error reading file: ", err);
+      return;
+    }
+    console.log("Data written successfully");
+
+    fs.readFile("output.txt", "utf8", (err, data) => {
+      if (err) {
+        console.log("Error reading file: ", err);
+        return;
+      }
+      console.log(data)
+    });
+  });
+});
+
+_____________________________________________________________________________
+
+Promises:
+==========
+Promises in JavaScript are a way to handle asynchronous operations 
+more cleanly than callbacks.
+
+A Promise in JavaScript is an object that represents the eventual 
+completion or failure of an asynchronous operation and its resulting 
+value. 
+
+It provides a cleaner way to handle asynchronous tasks compared 
+to traditional callbacks.
+
+Avoid callback hell and easier error handling with promises.
+
+We will chain multiple async operations.
+
+
+States of a Promise:
+    1. Pending – Initial state, operation not completed yet.
+    2. Fulfilled – Operation completed successfully.
+    3. Rejected – Operation failed.
+
+
+Promise Example:
+=================
+const myPromise = new Promise((resolve, reject) => {
+  let success = true;
+  if (success) {
+    resolve("Operation successful!");
+  } else {
+    reject("Operation failed!");
+  }
+});
+
+myPromise
+  .then((result) => console.log(result))
+  .catch((error) => console.log(error));
+
+
+divideEx.js:
+-------------
+function divideFn(num1, num2) {
+  return new Promise((resolve, reject) => {
+    if (num2 === 0) {
+      reject("Can not perform the division by 0");
+    } else {
+      resolve(num1 / num2);
+    }
+  });
+}
+
+divideFn(10,0)
+  .then((result) => console.log(result))
+  .catch((error) => console.log(error));
+
+
+
+_____________________________________________________________________________
+
+
+Async and Await:
+=================
+The async keyword is used to declare a function that returns 
+a Promise.
+
+
+await:
+------
+await keyword can only be used inside an async function.
+
+It pauses execution until the Promise resolves or rejects.
+
+Makes asynchronous code looks synchronous and easier to read.
+
+Avoids callback hell.
+
+Cleaner than .then() and .catch().
+
+Easier error handling with try...catch
+
+
+index.js:
+----------
+const fs = require("fs").promises;
+
+async function processFile() {
+    try {
+        const readDataFromInput = await fs.readFile("input.txt", "utf8");
+        const modifiedData = readDataFromInput.toUpperCase();
+
+        await fs.writeFile("output.txt", modifiedData);
+        console.log("Data written successfully!");
+
+        const outputData = await fs.readFile("output.txt", "utf8");
+        console.log(outputData)
+    }
+    catch(error) {
+        console.error("Error: ", error)
+    }
+}
+
+processFile()
+
+_____________________________________________________________________________
+
+Event Emitter in Node JS:
+==========================
+The EventEmitter in Node.js is a core feature that enables 
+event-driven programming.
+
+Provides a way to subscribe events and emit events.
+
+Commonly used in Node.js internals (e.g., streams, HTTP servers).
+
+
+Key Methods:
+=============
+on(event, listener) → Register an event listener.
+
+emit(event, [args]) → Trigger an event.
+
+once(event, listener) → Listen for an event only once.
+
+removeListener(event, listener) → Remove a specific listener.
+
+removeAllListeners(event) → Remove all listeners for an event.
+
+
+
+index.js:
+-----------
+const EventEmitter = require("events");
+
+const firstEmitter = new EventEmitter();
+
+firstEmitter.on('greet', (name)=> {
+    console.log(`Hello ${name}`)
+});
+
+firstEmitter.emit('greet', 'Jaya Mannem')
+
+
+multipleEvents.js:
+-------------------
+const EventEmitter = require("events");
+
+const multipleEvents = new EventEmitter();
+
+multipleEvents.on("start", () => {
+  console.log("Process Started");
+});
+
+multipleEvents.on("end", () => {
+  console.log("Process Ended");
+});
+
+multipleEvents.emit("start");
+setTimeout(() => {
+  multipleEvents.emit("end");
+}, 2000);
+
+
+Custom Event Example:
+======================
+const EventEmitter = require("events");
+
+class MyCustomEmitter extends EventEmitter {
+  constructor() {
+    super();
+    this.greeting = "Hello";
+  }
+
+  greet(name) {
+    this.emit('greeting', `${this.greeting} ${name}`)
+  }
+}
+
+const CustomEmitter = new MyCustomEmitter();
+
+CustomEmitter.on('greeting', (input)=> {
+    console.log('Greeting Event: ', input)
+});
+
+CustomEmitter.greet('Jay Mannem')
+
+
+
+File Upload Example:
+======================
+const EventEmitter = require("events")
+
+class FileUploader extends EventEmitter {
+  upload(file) {
+    console.log(`Starting upload for ${file}...`);
+
+    let progress = 0; 
+
+    const interval = setInterval(() => {
+        progress += 20;
+        this.emit('progress', progress)
+        if(progress === 100) {
+            clearInterval(interval);
+            this.emit('done', `${file} uploaded successfully!`)
+        }
+    }, 1000)
+  }
+}
+
+const uploader = new FileUploader();
+
+uploader.on('progress', (percent)=> {
+    console.log(`Upload progress: ${percent}%`)
+})
+
+uploader.on('done', (message)=> {
+    console.log(message)
+});
+
+uploader.upload('myFile.txt');
+_______________________________________________________________________________

@@ -1,0 +1,167 @@
+Express.js is a fast, minimal, and flexible web application framework 
+for Node.js.
+
+It simplifies building web servers and APIs by providing a set of tools 
+and features for handling HTTP requests, 
+routing, 
+middleware,
+Easy integration with templates and databases,
+Simplified request/response handling
+
+We will install express by using below command: 
+    npm install express
+
+
+Advantages of Express JS:
+==========================
+1. Express provides an easy way for creating servers and handling 
+requests and responses.
+
+2. Express offers a simple and flexible routing system.
+
+3. Middleware Support:
+        Logging 
+        Authentication 
+        Error handling 
+        Parsing JSON 
+
+4. Fast and Lightweight
+
+5. Perfect for building RESTful services.
+
+6. Handles JSON easily with express.json()
+
+7. Easy to integrate with databases (MongoDB, MySQL).
+
+8. Cross-Platform and Open Source
+
+
+Disadvantages of Express:
+==========================
+1. Limited Built-in Features
+
+2. Callback-Based Middleware
+
+3. it’s not the option for high-performance apps.
+
+4. Developers must manually handle:
+        Input Validation 
+        CSRF Protection 
+        Rate Limiting 
+
+5. Maintenance Overhead
+
+
+***********************************************************************************
+
+Key features of Express JS:
+=============================
+1. Fast and Lightweight 
+
+2. Routing 
+
+3. Middleware Support
+
+4. Built-in HTTP Utility Methods
+
+5. Template Engine Integration
+
+6. Serve Static Files
+
+7. REST API Support
+
+8. Error Handling
+
+9. Large Ecosystem
+
+
+Limitations of Express JS:
+===========================
+1. Developers must decide folder structure, middleware usage, etc.
+
+2. Limited Built-in Features:
+        ORM for databases
+        Authentication system
+        Advanced security features
+
+3. Middleware chaining can become hard to manage in large apps.
+
+4. Express does not enforce strong security by default.
+
+5. Maintenance Overhead
+
+***********************************************************************************
+
+Example:
+=========
+const express = require("express");
+
+const app = express();
+
+app.get("/", (req, res) => {
+    res.send("Welcome to Express JS Tutorial")
+});
+
+const PORT = 3000;
+
+app.listen(PORT, () => {
+    console.log("Server is running at port: " + PORT)
+})
+
+
+***********************************************************************************
+
+Routes
+=======
+routes define how our application responds to client requests for specific 
+URLs and HTTP methods. 
+
+A route is a combination of:
+    HTTP Methods
+    Path 
+    Callback function (handles the req and res);
+
+
+courses.json:
+-------------
+{
+  "courses": [
+    { "id": 1, "name": "Node.js Basics" },
+    { "id": 2, "name": "Express.js Advanced" },
+    { "id": 3, "name": "JavaScript Fundamentals" }
+  ]
+}
+
+
+routes.js:
+-----------
+
+
+
+
+***********************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+***********************************************************************************
+
+
+
