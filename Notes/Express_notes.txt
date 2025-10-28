@@ -109,7 +109,7 @@ app.listen(PORT, () => {
 })
 
 
-***********************************************************************************
+************************************************************************************
 
 Routes
 =======
@@ -135,17 +135,173 @@ courses.json:
 
 routes.js:
 -----------
+const express = require("express");
+const data = require("./courses.json");
 
+const app = express();
+const PORT = 3000;
+
+// get home page
+app.get("/", (req, res) => {
+  res.send("Home Page");
+});
+
+// get all courses
+app.get("/courses", (req, res) => {
+  res.json(data);
+});
+
+// get specific course
+app.get("/courses/:id", (req, res) => {
+  const courseId = parseInt(req.params.id);
+  const getSinglecourse = data.courses.find((course) => course.id === courseId);
+
+  if (getSinglecourse) {
+    res.json(getSinglecourse);
+  } else {
+    res.status(404).send("Course is not found! please try with other id");
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running at PORT: ${PORT}`);
+});
+
+***********************************************************************************
+
+Middlewares in Express JS:
+===========================
+Middleware in Express.js is a function that runs between the request and 
+the response cycle.
+
+It can: 
+  Access request and response objects.
+  Modify them 
+  End the request-response cycle
+  Pass control to the next middleware using next().
+
+Syntax:
+========
+app.use((req, res, next) => {
+    console.log('Middleware executed');
+    next(); // Pass control to next middleware or route
+});
+
+
+Advantages of Middlewares:
+===========================
+1. Code Reusability - Common logic (e.g., authentication, logging) can be 
+reused across routes.
+
+2. Modularity – Break down app logic into smaller
+
+3. Request Preprocessing – Parse JSON, validate data, handle sessions 
+before reaching routes.
+
+4. Error Handling – Centralized error handling using error middleware.
+
+5. Third-Party Integration – Easily integrate libraries like body-parser, 
+cors, morgan.
+
+
+Types of Middlewares in Express:
+=================================
+  1. Application-level Middleware
+  2. Router-level Middleware
+  3. Built-in Middleware
+  4. Third-party Middleware
+  5. Error-handling Middleware
+
+
+1. Application-level Middleware:
+===================================
+Bind application-level middleware to an instance of the app object by 
+using app.use() and app.method()
+
+app-middleware.js:
+------------------
+const express = require("express");
+const app = express();
+
+const appLevelMiddleWare = (req, res, next)=> {
+    console.log("This middleware will run on every request");
+
+    next();
+};
+
+app.use(appLevelMiddleWare);
+
+app.get("/", (req, res)=> {
+    res.send('Home Page')
+});
+
+app.get("/about", (req, res)=> {
+    res.send('About Page')
+});
+
+app.listen(3000, ()=> {
+    console.log("Server is running successfully!")
+});
+
+
+What next() Does:
+===================
+next() passes control to the next middleware or route handler in 
+the stack.
+
+Without next(), the request stops at the current middleware.
+
+
+When next() is Mandatory:
+==========================
+If we have multiple middlewares then next() is mandatory. Without next(), 
+the second middleware never runs.
+
+If you want to pass control to route handlers after middleware then next() 
+is mandatory.
+
+
+When We Don’t Need next():
+=============================
+If the middleware ends the request-response cycle by sending a response
+then next() is not required.
+
+
+timeStamp-middleware.js:
+--------------------------
+const timeStampLogger = (req, res, next) => {
+    const timeStamp = new Date().toISOString();
+
+    console.log(`${timeStamp} from ${req.method} to ${req.url}`)
+    next();
+}
 
 
 
 ***********************************************************************************
 
+EJS Template Engine:
+=====================
+
+EJS - Embedded JavaScript templating.
+
+EJS is a popular template engine for Express.js that allows us to generate 
+dynamic HTML pages using JavaScript.
+
+Instead of sending plain text or JSON, we can render HTML views with 
+dynamic data.
 
 
+Why Use EJS?
+=============
+Helps separate presentation logic (HTML) from business logic (JavaScript).
+
+Makes it easy to create dynamic web pages.
+
+Allows embedding JavaScript code inside HTML using <%= %> or <% %> tags.
 
 
-
+npm install ejs
 
 
 
