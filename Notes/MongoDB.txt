@@ -1,11 +1,520 @@
+How to connect to MongoDB:
+==========================
+
+db.js:
+-------
+const mongoose = require("mongoose");
+
+const connectToDB = async () => {
+    try {
+        await mongoose.connect("mongodb+srv://jaymannem21:jaymannem21@cluster0.xyrs4lw.mongodb.net/");
+        console.log("mongodb is connected successfully!")
+    } catch(error) {
+        console.error("Mongodb connection failed: ", error);
+        process.exit(1)
+    }
+}
+
+connectToDB();
+
+
+server.js:
+-----------
+require('dotenv').config();
+const express = require("express");
+const connectToDB = require("./database/db")
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// connect to database
+connectToDB();
+
+// middleware 
+app.use(express.json());
+
+app.listen(PORT, ()=> {
+    console.log(`Server is running on PORT: ${PORT}`)
+})
 
 
 
-
+terminal ---> node server.js
 
 **************************************************************************************
 Mongoose:
 ==========
+
+npm install mongoose 
+
+It provides a structured way to interact with MongoDB by defining 
+schemas and models.
+
+It’s not part of MongoDB itself, but a separate package used in 
+Node.js applications.
+
+Example:
+========
+const mongoose = require('mongoose');
+
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/myDB');
+
+// Define a schema
+const userSchema = new mongoose.Schema({
+  name: String,
+  age: Number
+});
+
+// Create a model
+const User = mongoose.model('User', userSchema);
+
+// Insert a document
+const newUser = new User({ name: 'Jaya', age: 30 });
+newUser.save();
+
+
+// price > 100 AND inStock = true
+const items = await Product.find({ price: { $gt: 100 }, inStock: true });
+
+
+// find one document by using name
+const one = await Product.findOne({ name: 'iPhone' });
+
+
+// find all the documents from collection.
+const allUsers = await User.find({});
+
+
+// include only name & email
+const names = await User.find({}, 'name email');
+
+
+// exclude password
+const noPwd = await User.find({}, { password: 0 });  
+
+
+// To get users whose isActive is false
+const inactiveUsers = await User.find({ isActive: false });
+
+**************************************************************************************
+
+find() vs findOne():
+=====================
+
+find(filter):
+==============
+1. Returns an array of matching documents.
+
+2. We expect many results 
+
+3. Supports .sort(), .skip(), .limit(), .lean(), etc.
+
+
+findOne():
+==========
+1. Returns a single document.
+
+2. If we have multiple documents match, it returns the first document that 
+matches the criteria. 
+
+**************************************************************************************
+
+findById():
+============
+findOne() can match any field (e.g., { email: 'abc@gmail.com' }).
+
+findById() is only for _id lookups.
+
+Example:
+=========
+
+try {
+  const user = await User.findById('6741a3f8c8f3c7b0e1ab1234');
+  if (user) {
+    console.log('Found user:', user);
+  } else {
+    console.log('No user found with that ID');
+  }
+} catch (err) {
+  console.error('Invalid ID format:', err.message);
+}
+
+
+
+select():
+=========
+To include or exclude fields.
+
+const selectedFields = await User.find().select('name email -_id')
+
+const users = await User.find({ isActive: false }).select('name email'); // include
+const users2 = await User.find({ isActive: false }).select('-password -tags'); // exclude
+
+
+limit():
+========
+Restricts the number of documents returned.
+
+const users = await User.find({}).limit(5);
+
+
+skip():
+=======
+It’s mainly used for pagination or when you want to start reading results 
+from a specific offset.
+
+Example: If we have 100 users and we want to show page 3 with 10 users 
+per page, we skip the first 20 users.
+
+
+Example:
+---------
+const page = 3;       // current page
+const pageSize = 10;  // items per page
+
+const users = await User.find({})
+  .skip((page - 1) * pageSize)  // skip first 20 docs
+  .limit(pageSize);             // return next 10 docs
+
+
+sorting():
+===========
+const sorderUsers = await User.find().sort({age: -1});
+
+const sorderUsers = await User.find().sort({age: 1});
+
+sort({ age: -1 }) --> -1 means descending.
+
+sort({ age: 1 }) --> 1 means ascending.
+
+
+
+countDocuments():
+==================
+countDocuments() is faster and more efficient because it only counts, 
+without fetching all documents.
+
+find() retrieves full documents, which is unnecessary if we only 
+need the count.
+
+const totalUsers = await User.countDocuments({});
+console.log(totalUsers); // 4
+
+const olderUsers = await User.countDocuments({ age: { $gt: 25 } });
+console.log(olderUsers) // 2
+
+const inActiveUsers = await User.countDocuments({isActive: false});
+console.log(inActiveUsers) // 2
+
+
+delete():
+=========
+const deleteUser = await User.findByIdAndDelete(userCreated._id);
+console.log('deleteUser -> ', deleteUser)
+
+// Delete a Single Document - By filter
+await User.deleteOne({ email: 'subbareddy@gmail.com' });
+
+
+// Delete a Single Document - By ID
+await User.findByIdAndDelete('6741a3f8c8f3c7b0e1ab1234');
+
+
+// Delete all - inactive users
+const result = await User.deleteMany({ isActive: false });
+console.log(`Deleted count: ${result.deletedCount}`);
+
+
+// Drop the underlying collection for the User model
+await User.collection.drop();
+
+
+Update User:
+=============
+const updatedUser = await User.findByIdAndUpdate(userCreated._id, {
+    $set: {age: 100},
+    $push: {tags: 'updated-user'}
+}, {new: true});
+
+console.log('updatedUser -->', updatedUser)
+
+
+$push -> appends an element to an array
+
+$set -> replaces the field value (age → 100).
+
+{ new: true } -> Tells Mongoose to return the updated document
+
+
+**************************************************************************************
+Book Store API Development:
+============================
+
+Project Folder Structure:
+==========================
+
+controllers 
+  book-controller.js
+database 
+  db.js 
+models 
+  book.js
+routes
+  book-routes.js
+.env
+server.js
+
+
+db.js:
+------
+const mongoose = require("mongoose");
+
+const connectToDB = async () => {
+    try {
+        await mongoose.connect("mongodb+srv://jaymannem21:jaymannem21@cluster0.xyrs4lw.mongodb.net/");
+        console.log("mongodb is connected successfully!")
+    } catch(error) {
+        console.error("Mongodb connection failed: ", error);
+        process.exit(1)
+    }
+}
+
+module.exports = connectToDB;
+
+
+book.js:
+--------
+const mongoose = require("mongoose");
+
+const BookSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: [true, "Book title is required"],
+    trim: true,
+    maxLength: [100, "Book title can not be more than 100 characters"],
+  },
+  author: {
+    type: String, 
+    required: [true, "Author name is required"],
+    trim: true
+  },
+  year: {
+    type: Number,
+    required: [true, 'Publication year is required'],
+    min: [1000, 'Year must be atleast 1000'],
+    max: [new Date().getFullYear(), "year can not be in the future"]
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+module.exports = mongoose.model("Book", BookSchema)
+
+* trim: true → removes extra spaces from strings.
+
+book-routes.js:
+---------------
+const express = require("express");
+const {
+  getAllBooks,
+  getBookById,
+  addNewBook,
+  updateBook,
+  deleteBook,
+} = require("../controllers/book-controller");
+
+// create express router
+const router = express.Router();
+
+router.get("/get", getAllBooks);
+router.get("/get/:id", getBookById);
+router.post("/add", addNewBook);
+router.put("/update/:id", updateBook);
+router.delete("/delete/:id", deleteBook);
+
+module.exports = router;
+
+
+
+book-controller.js:
+--------------------
+const Book = require("../models/book");
+
+const getAllBooks = async (req, res) => {
+  try {
+    const allBooks = await Book.find({});
+    if (allBooks?.length > 0) {
+      res.status(200).json({
+        success: true,
+        message: "Books fetched successfully!",
+        data: allBooks,
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: "No books found",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong! Please try again",
+    });
+  }
+};
+
+const getSingleBookById = async (req, res) => {
+  try {
+    const getCurrentBookID = req.params.id;
+    const bookDetailsByID = await Book.findById(getCurrentBookID);
+
+    if (!bookDetailsByID) {
+      res.status(404).json({
+        success: false,
+        message:
+          "Book with the current ID is not found! Please try with a different ID",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: bookDetailsByID,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong! Please try again",
+    });
+  }
+};
+
+const addNewBook = async (req, res) => {
+  try {
+    const newBookFormData = req.body;
+    const newlyCreatedBook = await Book.create(newBookFormData);
+    if (newBookFormData) {
+      res.status(201).json({
+        success: true,
+        message: "Book added successfully",
+        data: newlyCreatedBook,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong! Please try again",
+    });
+  }
+};
+
+const updateBook = async (req, res) => {
+  try {
+    const updatedBookFormData = req.body;
+  const getCurrentBookId = req.params.id;
+  const updateBook = await Book.findByIdAndUpdate(
+    getCurrentBookId,
+    updatedBookFormData,
+    {
+      new: true,
+    }
+  );
+
+  if(!updateBook) {
+    res.status(404).json({
+      success: false,
+      message: "Book with the current ID is not found! Please try with a different ID"
+    })
+  }
+  res.status(200).json({
+    success: true,
+    message: "Book updated successfully!",
+    data: updateBook
+  })
+  } catch(error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong! Please try again",
+    });
+  }
+};
+
+const deleteBook = async (req, res) => {
+  try {
+    const getCurrentBookID = req.params.id;
+    const deleteBook = await Book.findByIdAndDelete(getCurrentBookID);
+
+    if (!deleteBook) {
+      res.status(404).json({
+        success: false,
+        message:
+          "Book with the current ID is not found! Please try with a different ID",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Book deleted successfully!",
+      data: deleteBook,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong! Please try again",
+    });
+  }
+};
+
+module.exports = {
+  getAllBooks,
+  getSingleBookById,
+  addNewBook,
+  updateBook,
+  deleteBook,
+};
+
+
+server.js:
+-----------
+require("dotenv").config();
+const express = require("express");
+const connectToDB = require("./database/db");
+const bookRoutes = require("./routes/book-routes");
+
+const app = express();
+const PORT = process.env.PORT || 3000
+
+//connect to our database
+connectToDB();
+
+//middleware
+app.use(express.json());
+
+//routes here
+app.use("/api/books", bookRoutes);
+
+app.listen(PORT, () => {
+  console.log(`Server is now running on port ${PORT}`);
+});
+
+
+.env:
+------
+const PORT = 3000
+
+
+**************************************************************************************
+
+
+
+
+
+
 
 
 
