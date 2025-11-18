@@ -1105,3 +1105,60 @@ uploader.on('done', (message)=> {
 
 uploader.upload('myFile.txt');
 _______________________________________________________________________________
+
+bcrypt:
+========
+bcrypt is a popular password-hashing algorithm designed to securely 
+store passwords.
+
+It uses the Blowfish cipher internally and adds a salt automatically to 
+each password before hashing.
+
+
+Why use bcrypt instead of plain hashing:
+==========================================
+1. Salted by default: Prevents rainbow table attacks.
+
+2. Slow and tunable: We can set a cost factor (e.g., 10 or 12) to 
+make hashing computationally expensive for attackers.
+
+
+How bcrypt works:
+=================
+1. Takes our password.
+2. Generates a random salt.
+3. Hashes the password + salt using Blowfish-based algorithm.
+4. Stores the result as a string that includes: 
+    The algorithm identifier
+    The cost factor
+    The salt
+    The hashed password
+
+Example bcrypt hash: 
+    $2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36rY4pQf5pX1YxJZ4fQJQeW
+
+2b → bcrypt version
+10 → cost factor
+Next 22 chars → salt
+Remaining → hashed password
+
+Example:
+=========
+const bcrypt = require('bcrypt');
+
+const password = "mySecret123";
+const saltRounds = 10;
+
+// Hashing
+const hash = await bcrypt.hash(password, saltRounds);
+console.log(hash);
+
+// Verifying
+const isMatch = await bcrypt.compare(password, hash);
+console.log(isMatch); // true
+
+
+* Never store plain passwords—always hash them.
+* bcrypt is widely used in authentication systems
+
+_______________________________________________________________________________

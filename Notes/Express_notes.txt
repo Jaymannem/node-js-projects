@@ -411,6 +411,345 @@ app.listen(PORT, () => {
 });
 
 ***********************************************************************************
+Authentication and authorization:
+==================================
+
+controllers
+  auth-controller.js
+database 
+  db.js 
+middleware
+  admin-middleware.js 
+  auth-middleware.js
+models 
+  user.js
+routes 
+  admin-routes.js 
+  auth-routes.js 
+  home-routes.js 
+server.js 
+.env
+
+.env:
+------
+PORT = 3000
+MONGODB_URI = mongodb+srv://jaymannem21:jaymannem21@cluster0.xyrs4lw.mongodb.net/
+JWT_TOKEN_SECRET = JWT_TOKEN_SECRET
+
+
+server.js:
+-----------
+require("dotenv").config();
+
+const express = require("express");
+const connectDB = require("./database/db");
+const authRoutes = require("./routes/auth-routes")
+const homeRoutes = require("./routes/home-routes")
+const adminRoutes = require("./routes/admin-routes")
+
+const PORT = process.env.PORT || 3000;
+const app = express();
+
+connectDB();
+
+// middlewares
+app.use(express.json())
+app.use("/api/auth", authRoutes);
+app.use("/api/home", homeRoutes);
+app.use("/api/admin", adminRoutes);
+
+
+app.listen(PORT, ()=> {
+    console.log(`Server is running on PORT: ${PORT}`)
+})
+
+models/user.js
+---------------
+const mongoose = require("mongoose");
+
+const UserSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      unique: true,
+      required: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      lowercase: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("User", UserSchema);
+
+schema: 
+========
+A schema describes the shape of the data like 
+Fields and types (e.g., name: String, age: Number)
+
+Defaults, required fields, enums, indexes, Validation rules
+
+In Node.js apps, Mongoose’s Schema defines our data structure 
+and validation logic in code.
+
+
+model:
+=====
+Model provides a programmatic interface for interacting with the 
+corresponding MongoDB collection.
+
+
+auth-controller.js:
+---------------------
+const UserAuth = require("../models/user");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+// registration controller
+async function registerUser(req, res) {
+  try {
+    // extract user information from req body
+    const { username, email, password, role } = req.body;
+
+    // check if the user is already exist in our db
+    const userExisting = await UserAuth.findOne({
+      $or: [{ username }, { email }],
+    });
+
+    if (userExisting) {
+      res.status(400).json({
+        success: false,
+        message:
+          "User is already exists, please try with a different username or email",
+      });
+    }
+
+    // hash user password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // create a new user and save in database
+    const createUser = new UserAuth({
+      username,
+      email,
+      password: hashedPassword,
+      role: role || "user",
+    });
+
+    await createUser.save();
+
+    if (createUser) {
+      res.status(200).json({
+        success: true,
+        message: "User is registered successfully!",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "Unable to register the user, please try again.",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong! Please try again.",
+    });
+  }
+}
+
+// login controller
+async function loginUser(req, res) {
+  try {
+    const { username, password } = req.body;
+    // check user is registered in db or not.
+    const user = await UserAuth.findOne({ username });
+
+    if (!user) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid Credentials",
+      });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid Credentials",
+      });
+    }
+
+    // create a user token
+    const accessToken = jwt.sign(
+      {
+        userId: user._id,
+        username: user.username,
+        role: user.role,
+      },
+      process.env.JWT_TOKEN_SECRET,
+      { expiresIn: "30m" }
+    );
+
+    res.status(200).json({
+      success: true, 
+      message: "Logged in successful!",
+      accessToken
+    })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong! Please try again.",
+    });
+  }
+}
+
+module.exports = {
+  registerUser,
+  loginUser,
+};
+
+
+
+db.js:
+-------
+const mongoose = require("mongoose");
+
+const connectDB = async ()=> {
+    try {
+        await mongoose.connect(process.env.MONGODB_URI);
+        console.log("Mongodb connected successfully")
+    } catch(error) {
+        console.log("Error in mongodb connection", error)
+    }
+}
+
+module.exports = connectDB
+
+
+
+admin-middleware.js:
+----------------------
+const isAdminUser = (req, res, next)=> {
+    if(req.userInfo.role !== "admin") {
+        res.status(403).json({
+            success: false, 
+            message: "Access denined! Admin rights required"
+        })
+    }
+    next();
+}
+
+module.exports = isAdminUser
+
+
+auth-middleware.js:
+---------------------
+const jwt = require("jsonwebtoken");
+
+const authMiddleware = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  console.log(token);
+
+  if (!token) {
+    res.status(401).json({
+      success: false,
+      message: "Access denied, Please login to continue.",
+    });
+  }
+
+  // decode the token to get user info
+  try {
+    const decodeTokenInfo = jwt.verify(token, process.env.JWT_TOKEN_SECRET);
+    console.log(decodeTokenInfo)
+    req.userInfo = decodeTokenInfo;
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Token has expired, Please login to continue.",
+    });
+  }
+
+  next();
+};
+
+module.exports = authMiddleware;
+
+
+
+admin-routes.js:
+-----------------
+const express = require("express");
+const authMiddleware = require("../middleware/auth-middleware");
+const adminMiddleware = require("../middleware/admin-middleware")
+
+const router = express.Router();
+
+router.get("/welcome", authMiddleware, adminMiddleware, (req, res)=> {
+    res.json({
+        message: 'Welcome to admin page'
+    })
+})
+
+module.exports = router;
+
+
+auth-routes.js:
+-----------------
+const express = require("express");
+const { registerUser, loginUser } = require("../controllers/auth-controller");
+
+
+const router = express.Router();
+
+router.post("/register", registerUser); 
+router.post("/login", loginUser); 
+
+
+module.exports = router; 
+
+
+home-routes.js:
+-----------------
+const express = require("express");
+const authMiddleware = require("../middleware/auth-middleware")
+
+const router = express.Router();
+
+router.get("/welcome", authMiddleware, (req, res)=> {
+    const { username, userId, role} = req.userInfo;
+    res.json({
+        message: "Welcome to home page",
+        user: {
+            _id: userId,
+            username, 
+            role
+        }
+    })
+})
+
+module.exports = router;
+
+***********************************************************************************
 
 
 
