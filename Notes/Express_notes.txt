@@ -749,6 +749,85 @@ router.get("/welcome", authMiddleware, (req, res)=> {
 
 module.exports = router;
 
+
+
+
+File Upload:
+=============
+Multer is a Node.js middleware for handling multipart/form-data, 
+which is primarily used for uploading files (like images, PDFs, etc.) 
+from the client to the server.
+
+npm install multer 
+
+Express doesn’t natively handle file uploads.
+
+Multer parses incoming form data and makes uploaded files accessible 
+via req.file or req.files.
+
+Supports single or multiple file uploads.
+
+DiskStorage: Save files locally on our server.
+
+MemoryStorage: Keep files in memory (useful for sending directly 
+to cloud services).
+
+
+
+Cloudinary:
+============
+Cloudinary is a cloud-based media management service that stores, 
+optimizes, and delivers images and videos.
+
+It provides APIs for uploading files and transforming them on the fly.
+
+Provides CDN for fast delivery.
+
+Secure and scalable.
+
+Built-in image/video transformations (resize, crop, compress, 
+watermark, etc.).
+
+Upload files directly from client or server.
+
+Apply transformations via URL (e.g., resize, format change).
+
+Handles optimization for web performance.
+
+npm i cloudinary
+
+
+
+How Multer and cloudinary work together:
+==========================================
+
+Multer handles the upload from client to server.
+
+Cloudinary stores the files in the cloud.
+
+Use Multer with MemoryStorage to avoid saving locally.
+
+Pass the file buffer to Cloudinary for upload.
+
+Get back a secure URL from Cloudinary and store it in database.
+
+
+Example:
+=========
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ***********************************************************************************
 
 
